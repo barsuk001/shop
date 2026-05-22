@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Барсук Онлайн</title>
+    <title>Barsuk Online Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -21,11 +21,21 @@
             border-bottom: 1px solid var(--tg-theme-hint-color, #ccc);
             margin-bottom: 15px;
         }
+        .category-section {
+            margin-bottom: 20px;
+        }
+        .category-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+            padding-left: 5px;
+            color: var(--tg-theme-text-color, #222222);
+            border-left: 4px solid #e67e22;
+        }
         .catalog {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            padding-bottom: 80px;
         }
         .product-card {
             background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
@@ -44,7 +54,7 @@
             background-color: #e0e0e0;
         }
         .product-name {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             margin: 8px 0 4px 0;
             height: 38px;
@@ -90,7 +100,6 @@
             font-weight: bold;
             font-size: 14px;
         }
-        /* Стили для нижней плашки с кнопкой заказа */
         .footer-bar {
             position: fixed;
             bottom: 0;
@@ -117,13 +126,16 @@
             font-weight: bold;
             font-size: 14px;
         }
+        .main-container {
+            padding-bottom: 80px;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">🦅 Магазин «Барсук»</div>
     
-    <div class="catalog" id="catalog"></div>
+    <div class="main-container" id="main-container"></div>
 
     <div class="footer-bar">
         <div class="total-price">Итого: <span id="total-sum">0</span> ₸</div>
@@ -131,64 +143,115 @@
     </div>
 
     <script>
-        // Инициализируем Telegram Web App
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Расширяем на весь экран смартфона
+        tg.expand();
 
-        // Имитация базы данных товаров (Сюда потом пропишем реальные ссылки на фото)
-        const products = [
-            { id: "p1", name: "Разливное пиво Прага 1.0л", price: 1090, img: "https://images.unsplash.com/photo-1566633806327-68e152aaf26d?w=400" },
-            { id: "p2", name: "Разливное пиво Жигули 1.0л", price: 990, img: "https://images.unsplash.com/photo-1532634922-8fe0b757fb13?w=400" },
-            { id: "p3", name: "Виски Jack Daniel's 0.7л", price: 17900, img: "https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=400" },
-            { id: "p4", name: "Чипсы Lay's в ассортименте", price: 1250, img: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400" }
-        ];
+        // Изображения по умолчанию для каждой категории товаров
+        const defaultImages = {
+            beer: "https://images.unsplash.com/photo-1566633806327-68e152aaf26d?w=400",
+            vd: "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400",
+            wh: "https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=400",
+            soda: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400",
+            energy: "https://images.unsplash.com/photo-1622543953495-a17ff62585c0?w=400",
+            water: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400",
+            liqueur: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400",
+            cognac: "https://images.unsplash.com/photo-1510626176961-4b57d4f3f313?w=400",
+            bb: "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400",
+            sn: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400"
+        };
+
+        // Базовый каталог, который отобразится, если нет связи с ботом
+        let catalogData = {
+            "beer": {
+                "title": "🍻 Разливное пиво (за 1 литр)",
+                "items": [
+                    {"name": "Разливное пиво Прага 1.0л", "price": 1100, "status": true},
+                    {"name": "Разливное пиво Жигули 1.0л", "price": 990, "status": true},
+                    {"name": "Разливное пиво Шымкентское 1.0л", "price": 990, "status": true},
+                    {"name": "Разливное пиво Эрзманн 1.0л", "price": 1290, "status": true}
+                ]
+            }
+        };
+        
+        // Автоматически подгружаем ВСЕ категории и актуальные цены из твоего бота (shop_catalog.json)
+        try {
+            if (tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+                const decodedData = JSON.parse(decodeURIComponent(tg.initDataUnsafe.start_param));
+                if (decodedData && Object.keys(decodedData).length > 0) {
+                    catalogData = decodedData;
+                }
+            }
+        } catch (e) {
+            console.log("Ошибка загрузки каталога из параметров Telegram");
+        }
 
         const cart = {};
 
-        // Функция рендеринга карточек
-        function renderCatalog() {
-            const catalogDiv = document.getElementById('catalog');
-            catalogDiv.innerHTML = '';
+        // Функция построения витрины по подпунктам
+        function renderStore() {
+            const container = document.getElementById('main-container');
+            container.innerHTML = '';
 
-            products.forEach(prod => {
-                const count = cart[prod.id] ? cart[prod.id].count : 0;
-                let actionHtml = `<button class="btn-add" onclick="addToCart('${prod.id}')">В корзину</button>`;
+            for (const catId in catalogData) {
+                const category = catalogData[catId];
                 
-                if (count > 0) {
-                    actionHtml = `
-                        <div class="counter-container">
-                            <button class="counter-btn" onclick="changeCount('${prod.id}', -1)">-</button>
-                            <span class="counter-value">${count} шт</span>
-                            <button class="counter-btn" onclick="changeCount('${prod.id}', 1)">+</button>
+                // Отображаем только активные товары (status === true)
+                const visibleItems = category.items.filter(item => item.status !== false);
+                if (visibleItems.length === 0) continue;
+
+                // Создаем блок для категории (подпункта)
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                
+                let html = `<div class="category-title">${category.title}</div>`;
+                html += `<div class="catalog">`;
+
+                visibleItems.forEach((item, index) => {
+                    const pId = `${catId}_${index}`;
+                    const count = cart[pId] ? cart[pId].count : 0;
+                    const imgUrl = defaultImages[catId] || "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400";
+
+                    let actionHtml = `<button class="btn-add" onclick="addToCart('${pId}', '${item.name}', ${item.price})">В корзину</button>`;
+                    
+                    if (count > 0) {
+                        actionHtml = `
+                            <div class="counter-container">
+                                <button class="counter-btn" onclick="changeCount('${pId}', -1)">-</button>
+                                <span class="counter-value">${count} шт</span>
+                                <button class="counter-btn" onclick="changeCount('${pId}', 1)">+</button>
+                            </div>
+                        `;
+                    }
+
+                    html += `
+                        <div class="product-card">
+                            <img class="product-img" src="${imgUrl}" alt="${item.name}">
+                            <div class="product-name">${item.name}</div>
+                            <div class="product-price">${item.price} ₸</div>
+                            ${actionHtml}
                         </div>
                     `;
-                }
+                });
 
-                catalogDiv.innerHTML += `
-                    <div class="product-card">
-                        <img class="product-img" src="${prod.img}" alt="${prod.name}">
-                        <div class="product-name">${prod.name}</div>
-                        <div class="product-price">${prod.price} ₸</div>
-                        ${actionHtml}
-                    </div>
-                `;
-            });
+                html += `</div>`;
+                section.innerHTML = html;
+                container.appendChild(section);
+            }
             updateTotal();
         }
 
-        function addToCart(id) {
-            const prod = products.find(p => p.id === id);
-            cart[id] = { name: prod.name, price: prod.price, count: 1 };
-            renderCatalog();
+        function addToCart(pId, name, price) {
+            cart[pId] = { name: name, price: price, count: 1 };
+            renderStore();
         }
 
-        function changeCount(id, delta) {
-            if (!cart[id]) return;
-            cart[id].count += delta;
-            if (cart[id].count <= 0) {
-                delete cart[id];
+        function changeCount(pId, delta) {
+            if (!cart[pId]) return;
+            cart[pId].count += delta;
+            if (cart[pId].count <= 0) {
+                delete cart[pId];
             }
-            renderCatalog();
+            renderStore();
         }
 
         function updateTotal() {
@@ -199,7 +262,6 @@
             document.getElementById('total-sum').innerText = total;
         }
 
-        // Отправка данных обратно в бота при клике на "Оформить"
         function sendOrder() {
             let orderItems = [];
             for (const id in cart) {
@@ -211,13 +273,12 @@
                 return;
             }
 
-            // Передаем собранную корзину обратно в Python в виде JSON строки
             tg.sendData(JSON.stringify(orderItems));
-            tg.close(); // Закрываем Web App окно
+            tg.close();
         }
 
-        // Первый запуск витрины
-        renderCatalog();
+        // Запуск отображения
+        renderStore();
     </script>
 </body>
 </html>
