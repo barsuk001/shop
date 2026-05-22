@@ -3,418 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barsuk Online Store</title>
+    <title>Магазин Барсук</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #222222);
+            background-color: #131313;
+            color: #ffffff;
             margin: 0;
-            padding: 10px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
+
+        /* Шапка */
         .header {
             text-align: center;
-            padding: 10px 0;
+            padding: 15px;
             font-size: 20px;
             font-weight: bold;
-            border-bottom: 1px solid var(--tg-theme-hint-color, #ccc);
-            margin-bottom: 10px;
+            border-bottom: 1px solid #2d2d2d;
+            background-color: #1a1a1a;
         }
-        /* Новое меню категорий (вкладки) */
-        .categories-tabs {
+
+        /* Горизонтальное меню категорий */
+        .categories-menu {
             display: flex;
             overflow-x: auto;
+            background-color: #1a1a1a;
+            padding: 10px 5px;
+            border-bottom: 1px solid #2d2d2d;
             gap: 8px;
-            padding: 5px 0 12px 0;
-            margin-bottom: 10px;
-            border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #eee);
-            scrollbar-width: none; /* Убираем скроллбар в Firefox */
         }
-        .categories-tabs::-webkit-scrollbar {
-            display: none; /* Убираем скроллбар в Chrome/Safari */
+        .categories-menu::-webkit-scrollbar {
+            display: none; /* Прячем полосу прокрутки */
         }
-        .tab-btn {
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            color: var(--tg-theme-text-color, #222222);
-            border: 1px solid var(--tg-theme-hint-color, #ccc);
-            padding: 8px 14px;
+        .category-btn {
+            background-color: #262626;
+            color: #b3b3b3;
+            border: none;
+            padding: 8px 16px;
             border-radius: 20px;
-            white-space: nowrap;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
+            white-space: nowrap;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
-        .tab-btn.active {
+        .category-btn.active {
             background-color: #e67e22;
-            color: white;
-            border-color: #e67e22;
+            color: #ffffff;
         }
-        .category-section {
-            margin-bottom: 20px;
-        }
-        .category-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 10px 0 15px 0;
-            padding-left: 8px;
-            color: var(--tg-theme-text-color, #222222);
-            border-left: 4px solid #e67e22;
-        }
-        .catalog {
+
+        /* Сетка товаров */
+        .products-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
+            align-content: start;
+            padding-bottom: 80px; /* Чтобы нижняя панель не закрывала товар */
         }
+
         .product-card {
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            background-color: #1c1c1c;
             border-radius: 12px;
             padding: 10px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #2d2d2d;
         }
+
         .product-img {
             width: 100%;
-            height: 120px;
+            height: 110px;
             object-fit: cover;
             border-radius: 8px;
-            background-color: #e0e0e0;
+            background-color: #262626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
         }
+
         .product-name {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             margin: 8px 0 4px 0;
-            height: 38px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            min-height: 34px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+            overflow: hidden;
         }
+
         .product-price {
             font-size: 15px;
             font-weight: bold;
             color: #e67e22;
             margin-bottom: 8px;
         }
-        .btn-add {
-            background-color: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #ffffff);
+
+        .add-btn {
+            background-color: #3498db;
+            color: white;
             border: none;
             border-radius: 8px;
             padding: 8px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
+            transition: background-color 0.2s;
         }
-        .counter-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: #ddd;
-            border-radius: 8px;
-            overflow: hidden;
+        .add-btn:active {
+            background-color: #2980b9;
         }
-        .counter-btn {
-            background-color: #ccc;
-            border: none;
-            padding: 8px 12px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .counter-value {
-            font-weight: bold;
-            font-size: 14px;
-            color: #222;
-        }
-        .footer-bar {
+
+        /* Нижняя панель */
+        .footer-panel {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            padding: 12px;
-            box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
+            background-color: #1a1a1a;
+            border-top: 1px solid #2d2d2d;
+            padding: 12px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 100;
         }
+
         .total-price {
             font-size: 16px;
             font-weight: bold;
         }
-        .btn-order {
+
+        .checkout-btn {
             background-color: #2ecc71;
             color: white;
             border: none;
-            padding: 10px 20px;
             border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 15px;
             font-weight: bold;
-            font-size: 14px;
+            cursor: pointer;
         }
-        .main-container {
-            padding-bottom: 80px;
+        .checkout-btn:active {
+            background-color: #27ae60;
         }
     </style>
 </head>
 <body>
 
     <div class="header">🦅 Магазин «Барсук»</div>
-    
-    <div class="categories-tabs" id="categories-tabs"></div>
-    
-    <div class="main-container" id="main-container"></div>
 
-    <div class="footer-bar">
-        <div class="total-price">Итого: <span id="total-sum">0</span> ₸</div>
-        <button class="btn-order" id="btn-order" onclick="sendOrder()">Оформить</button>
+    <div class="categories-menu" id="categories-menu"></div>
+
+    <div class="products-container" id="products-container"></div>
+
+    <div class="footer-panel">
+        <div class="total-price" id="total-price">Итого: 0 ₸</div>
+        <button class="checkout-btn" onclick="sendOrder()">Оформить</button>
     </div>
 
     <script>
+        // Инициализируем Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand();
+        tg.expand(); // Раскрываем на весь экран
 
-        const defaultImages = {
-            beer: "https://images.unsplash.com/photo-1566633806327-68e152aaf26d?w=400",
-            vd: "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400",
-            wh: "https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=400",
-            soda: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400",
-            energy: "https://images.unsplash.com/photo-1622543953495-a17ff62585c0?w=400",
-            water: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400",
-            liqueur: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400",
-            cognac: "https://images.unsplash.com/photo-1510626176961-4b57d4f3f313?w=400",
-            bb: "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400",
-            sn: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400"
+        // Сюда будут загружены данные из твоего бота/JSON через специальный мост или эмуляцию
+        // Для автономной работы WebApp мы подтягиваем структуру каталога
+        let catalogData = {};
+        let currentCategory = "";
+        let cart = [];
+
+        // Иконки для красоты категорий на сайте
+        const categoryEmojis = {
+            "soda": "🥤",
+            "energy": "⚡",
+            "water": "💧",
+            "beer": "🍻",
+            "wh": "🥃",
+            "vd": "🍸",
+            "liqueur": "🍹",
+            "cognac": "🐴",
+            "bb": "🍺",
+            "sn": "🍿"
         };
 
-        // Полный базовый каталог со всеми твоими подпунктами (на случай оффлайна)
-        let catalogData = {
-            "beer": {
-                "title": "🍻 Разливное пиво",
-                "items": [
-                    {"name": "Разливное пиво Прага 1.0л", "price": 1100, "status": true},
-                    {"name": "Разливное пиво Эрзманн 1.0л", "price": 1290, "status": true},
-                    {"name": "Разливное пиво Чешское 1.0л", "price": 1290, "status": true},
-                    {"name": "Разливное пиво Жигули 1.0л", "price": 990, "status": true},
-                    {"name": "Разливное пиво Шымкентское 1.0л", "price": 990, "status": true},
-                    {"name": "Разливное пиво Кит 1.0л", "price": 940, "status": True},
-                    {"name": "Разливное пиво Немецкое 1.0л", "price": 1290, "status": True}
-                ]
-            },
-            "soda": {
-                "title": "🥤 Напитки и Соки",
-                "items": [
-                    {"name": "Coca-Cola 0.5л", "price": 590, "status": true},
-                    {"name": "Coca-Cola 1.0л", "price": 890, "status": true},
-                    {"name": "Fanta Orange 0.5л", "price": 590, "status": true},
-                    {"name": "Fanta Orange 1.0л", "price": 890, "status": true},
-                    {"name": "Sprite 0.5л", "price": 590, "status": true},
-                    {"name": "Сок Piko Ананас 1.0л", "price": 1490, "status": true},
-                    {"name": "Сок Piko Яблоко 1.0л", "price": 1490, "status": true}
-                ]
-            },
-            "energy": {
-                "title": "⚡ Энергетики",
-                "items": [
-                    {"name": "Энергетик Dizzy Original 0.33л", "price": 790, "status": true},
-                    {"name": "Энергетик Red Bull 0.25л", "price": 1150, "status": true},
-                    {"name": "Энергетик Gorilla Classic 0.45л", "price": 890, "status": true}
-                ]
-            },
-            "water": {
-                "title": "💧 Питьевая вода",
-                "items": [
-                    {"name": "Вода Samal 0.5л", "price": 550, "status": true},
-                    {"name": "Вода Samal 1.0л", "price": 750, "status": true},
-                    {"name": "Вода Bonaqua 0.5л", "price": 550, "status": true}
-                ]
-            },
-            "wh": {
-                "title": "🥃 Виски",
-                "items": [
-                    {"name": "Виски Ballantine's Finest 0.5л", "price": 8500, "status": true},
-                    {"name": "Виски Jack Daniel's Tennessee 0.7л", "price": 17900, "status": true},
-                    {"name": "Виски Monkey Shoulder 0.7л", "price": 29500, "status": true},
-                    {"name": "Виски William Lawson's 1.0л", "price": 11000, "status": true}
-                ]
-            },
-            "vd": {
-                "title": "🍸 Водка",
-                "items": [
-                    {"name": "Водка Beluga Premium 0.7л", "price": 26000, "status": true},
-                    {"name": "Водка Qazaq Eli Nomad 0.5л", "price": 7000, "status": true},
-                    {"name": "Водка Хортиця Ice 0.7л", "price": 4350, "status": True},
-                    {"name": "Водка Finlandia 0.5л", "price": 7900, "status": true}
-                ]
-            },
-            "liqueur": {
-                "title": "🍹 Ликеры и Текила",
-                "items": [
-                    {"name": "Ликер Jagermeister 0.5л", "price": 11900, "status": true},
-                    {"name": "Аперитив Aperol 1.0л", "price": 16750, "status": true},
-                    {"name": "Текила Olmeca Silver 0.5л", "price": 9500, "status": true}
-                ]
-            },
-            "cognac": {
-                "title": "🐴 Коньяк",
-                "items": [
-                    {"name": "Коньяк Бахус Vintage 0.5л", "price": 2500, "status": true},
-                    {"name": "Коньяк Казахстан 5 звезд 0.5л", "price": 5900, "status": true},
-                    {"name": "Коньяк Арарат 5 звезд 0.5л", "price": 6500, "status": true}
-                ]
-            },
-            "bb": {
-                "title": "🍺 Пиво в бутылках",
-                "items": [
-                    {"name": "Пиво Шымкентское Светлое 0.45л", "price": 560, "status": true},
-                    {"name": "Пиво Жигулевское Особое 0.5л", "price": 520, "status": true},
-                    {"name": "Пиво Bud Светлое 0.45л", "price": 810, "status": true},
-                    {"name": "Пиво Хайнекен Светлое 0.45л", "price": 1010, "status": true},
-                    {"name": "Пиво Корона Экстра Светлое 0.355л", "price": 1190, "status": true}
-                ]
-            },
-            "sn": {
-                "title": "🍿 Закуски и Снеки",
-                "items": [
-                    {"name": "Сыр Чечел копченый (косичка)", "price": 950, "status": true},
-                    {"name": "Семечки Джинн (Большая пачка)", "price": 650, "status": true},
-                    {"name": "Чипсы Lay's в ассортименте", "price": 1250, "status": true}
-                ]
-            }
-        };
-        
-        // Попытка динамически забрать из Telegram-сессии свежие данные
-        try {
-            if (tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-                const decodedData = JSON.parse(decodeURIComponent(tg.initDataUnsafe.start_param));
-                if (decodedData && Object.keys(decodedData).length > 0) {
-                    catalogData = decodedData;
-                }
-            }
-        } catch (e) {
-            console.log("Работа по дефолтному каталогу");
-        }
-
-        const cart = {};
-        let currentCategory = Object.keys(catalogData)[0]; // По умолчанию активна 1-я категория
-
-        // Строим вкладки меню сверху
-        function renderTabs() {
-            const tabsContainer = document.getElementById('categories-tabs');
-            tabsContainer.innerHTML = '';
-
-            for (const catId in catalogData) {
-                const category = catalogData[catId];
-                const visibleItems = category.items.filter(item => item.status !== false);
-                if (visibleItems.length === 0) continue;
-
-                const button = document.createElement('button');
-                button.className = `tab-btn ${catId === currentCategory ? 'active' : ''}`;
-                button.innerText = category.title.split(' ')[1] || category.title; // Берем текст без эмодзи или полный
-                button.onclick = () => {
-                    currentCategory = catId;
-                    renderTabs();
-                    renderStore();
+        // Запрашиваем каталог у твоего сервера бота при старте
+        // Заглушка каталога (будет заменена реальными данными при связи)
+        async function loadCatalog() {
+            try {
+                // Если бот передает данные при открытии, парсим их
+                // В базовой связке используем структуру, идентичную shop_catalog.json
+                const response = await fetch('shop_catalog.json');
+                catalogData = await response.json();
+            } catch (e) {
+                // Если файл не прочитался напрямую по относительной ссылке, генерируем структуру
+                catalogData = {
+                    "beer": {
+                        "title": "Разливное пиво (за 1 литр)",
+                        "items": [
+                            {"name": "Разливное пиво Прага 1.0л", "price": 1100, "status": true},
+                            {"name": "Разливное пиво Эрзманн 1.0л", "price": 1290, "status": true},
+                            {"name": "Разливное пиво Чешское 1.0л", "price": 1290, "status": true},
+                            {"name": "Разливное пиво Жигули 1.0л", "price": 990, "status": true},
+                            {"name": "Разливное пиво Шымкентское 1.0л", "price": 990, "status": true},
+                            {"name": "Разливное пиво Кит 1.0л", "price": 940, "status": true},
+                            {"name": "Разливное пиво Немецкое 1.0л", "price": 1290, "status": true}
+                        ]
+                    }
                 };
-                tabsContainer.appendChild(button);
             }
+            renderCategories();
         }
 
-        // Вывод товаров только выбранной вкладки
-        function renderStore() {
-            const container = document.getElementById('main-container');
-            container.innerHTML = '';
-
-            const category = catalogData[currentCategory];
-            if (!category) return;
-
-            const visibleItems = category.items.filter(item => item.status !== false);
+        // Отрисовка вкладок-категорий
+        function renderCategories() {
+            const menu = document.getElementById("categories-menu");
+            menu.innerHTML = "";
             
-            const section = document.createElement('div');
-            section.className = 'category-section';
-            
-            let html = `<div class="category-title">${category.title}</div>`;
-            html += `<div class="catalog">`;
-
-            visibleItems.forEach((item, index) => {
-                const pId = `${currentCategory}_${index}`;
-                const count = cart[pId] ? cart[pId].count : 0;
-                const imgUrl = defaultImages[currentCategory] || "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400";
-
-                let actionHtml = `<button class="btn-add" onclick="addToCart('${pId}', '${item.name}', ${item.price})">В корзину</button>`;
+            let isFirst = true;
+            for (let catId in catalogData) {
+                const btn = document.createElement("button");
+                btn.className = `category-btn ${isFirst ? 'active' : ''}`;
+                const emoji = categoryEmojis[catId] || "📦";
+                btn.innerText = `${emoji} ${catalogData[catId].title.replace(/[^а-яА-ЯёЁ\s]/g, "").trim()}`;
+                btn.onclick = () => switchCategory(catId, btn);
+                menu.appendChild(btn);
                 
-                if (count > 0) {
-                    actionHtml = `
-                        <div class="counter-container">
-                            <button class="counter-btn" onclick="changeCount('${pId}', -1)">-</button>
-                            <span class="counter-value">${count} шт</span>
-                            <button class="counter-btn" onclick="changeCount('${pId}', 1)">+</button>
-                        </div>
-                    `;
+                if (isFirst) {
+                    currentCategory = catId;
+                    isFirst = false;
                 }
-
-                html += `
-                    <div class="product-card">
-                        <img class="product-img" src="${imgUrl}" alt="${item.name}">
-                        <div class="product-name">${item.name}</div>
-                        <div class="product-price">${item.price} ₸</div>
-                        ${actionHtml}
-                    </div>
-                `;
-            });
-
-            html += `</div>`;
-            section.innerHTML = html;
-            container.appendChild(section);
-            
-            updateTotal();
-        }
-
-        function addToCart(pId, name, price) {
-            cart[pId] = { name: name, price: price, count: 1 };
-            renderStore();
-        }
-
-        function changeCount(pId, delta) {
-            if (!cart[pId]) return;
-            cart[pId].count += delta;
-            if (cart[pId].count <= 0) {
-                delete cart[pId];
             }
-            renderStore();
+            renderProducts();
+        }
+
+        // Переключение вкладок
+        function switchCategory(catId, element) {
+            document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+            element.classList.add("active");
+            currentCategory = catId;
+            renderProducts();
+        }
+
+        // Отрисовка карточек товаров
+        function renderProducts() {
+            const container = document.getElementById("products-container");
+            container.innerHTML = "";
+            
+            if (!catalogData[currentCategory]) return;
+            
+            catalogData[currentCategory].items.forEach((item, index) => {
+                if (item.status === false) return; // Пропускаем скрытые админом товары
+                
+                const card = document.createElement("div");
+                card.className = "product-card";
+                
+                // Выбираем эмодзи в зависимости от категории для заглушки фото
+                const emoji = categoryEmojis[currentCategory] || "🍺";
+                
+                card.innerHTML = `
+                    <div class="product-img">${emoji}</div>
+                    <div class="product-name">${item.name}</div>
+                    <div class="product-price">${item.price} ₸</div>
+                    <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">В корзину</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Логика корзины
+        function addToCart(name, price) {
+            cart.push({name, price});
+            updateTotal();
+            tg.HapticFeedback.impactOccurred("light"); // Виброотклик при нажатии
         }
 
         function updateTotal() {
-            let total = 0;
-            for (const id in cart) {
-                total += cart[id].price * cart[id].count;
-            }
-            document.getElementById('total-sum').innerText = total;
+            let total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById("total-price").innerText = `Итого: ${total} ₸`;
         }
 
+        // Отправка заказа обратно в чат боту при нажатии «Оформить»
         function sendOrder() {
-            let orderItems = [];
-            for (const id in cart) {
-                orderItems.push(cart[id]);
-            }
-            
-            if (orderItems.length === 0) {
-                alert("Корзина пуста!");
+            if (cart.length === 0) {
+                alert("Ваша корзина пуста!");
                 return;
             }
-
-            tg.sendData(JSON.stringify(orderItems));
+            
+            // Формируем данные и отправляем их боту текстом, закрывая WebApp
+            tg.sendData(JSON.stringify(cart));
             tg.close();
         }
 
-        // Первичный запуск интерфеса
-        renderTabs();
-        renderStore();
+        // Запуск при загрузке страницы
+        loadCatalog();
     </script>
 </body>
 </html>
