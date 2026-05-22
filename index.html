@@ -7,7 +7,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #131313;
             color: #ffffff;
             margin: 0;
@@ -15,13 +15,14 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        /* Шапка */
         .header {
             text-align: center;
             padding: 15px;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             border-bottom: 1px solid #2d2d2d;
             background-color: #1a1a1a;
@@ -32,31 +33,32 @@
             display: flex;
             overflow-x: auto;
             background-color: #1a1a1a;
-            padding: 10px 5px;
+            padding: 10px 8px;
             border-bottom: 1px solid #2d2d2d;
             gap: 8px;
         }
         .categories-menu::-webkit-scrollbar {
-            display: none; /* Прячем полосу прокрутки */
+            display: none;
         }
         .category-btn {
             background-color: #262626;
             color: #b3b3b3;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             white-space: nowrap;
             cursor: pointer;
             transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
         .category-btn.active {
             background-color: #e67e22;
             color: #ffffff;
         }
 
-        /* Сетка товаров */
+        /* Контейнер товаров */
         .products-container {
             flex: 1;
             overflow-y: auto;
@@ -65,7 +67,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             align-content: start;
-            padding-bottom: 80px; /* Чтобы нижняя панель не закрывала товар */
+            padding-bottom: 90px;
         }
 
         .product-card {
@@ -80,18 +82,17 @@
 
         .product-img {
             width: 100%;
-            height: 110px;
-            object-fit: cover;
+            height: 90px;
             border-radius: 8px;
             background-color: #262626;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 32px;
         }
 
         .product-name {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             margin: 8px 0 4px 0;
             min-height: 34px;
@@ -99,10 +100,11 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            line-height: 1.3;
         }
 
         .product-price {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
             color: #e67e22;
             margin-bottom: 8px;
@@ -117,13 +119,14 @@
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            transition: background-color 0.2s;
+            font-size: 12px;
+            -webkit-tap-highlight-color: transparent;
         }
         .add-btn:active {
             background-color: #2980b9;
         }
 
-        /* Нижняя панель */
+        /* Нижняя плашка */
         .footer-panel {
             position: fixed;
             bottom: 0;
@@ -139,7 +142,7 @@
         }
 
         .total-price {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
         }
 
@@ -148,10 +151,11 @@
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 15px;
+            padding: 10px 22px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         .checkout-btn:active {
             background-color: #27ae60;
@@ -172,81 +176,161 @@
     </div>
 
     <script>
-        // Инициализируем Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрываем на весь экран
+        tg.expand();
 
-        // Сюда будут загружены данные из твоего бота/JSON через специальный мост или эмуляцию
-        // Для автономной работы WebApp мы подтягиваем структуру каталога
-        let catalogData = {};
-        let currentCategory = "";
-        let cart = [];
-
-        // Иконки для красоты категорий на сайте
-        const categoryEmojis = {
-            "soda": "🥤",
-            "energy": "⚡",
-            "water": "💧",
-            "beer": "🍻",
-            "wh": "🥃",
-            "vd": "🍸",
-            "liqueur": "🍹",
-            "cognac": "🐴",
-            "bb": "🍺",
-            "sn": "🍿"
+        // 📦 ТВОЯ ПОЛНАЯ БАЗА ТОВАРОВ ПРЯМО В КОДЕ САЙТА
+        const catalogData = {
+            "beer": {
+                "title": "🍻 Разливное пиво",
+                "items": [
+                    {"name": "Разливное пиво Прага 1.0л", "price": 1100},
+                    {"name": "Разливное пиво Эрзманн 1.0л", "price": 1290},
+                    {"name": "Разливное пиво Чешское 1.0л", "price": 1290},
+                    {"name": "Разливное пиво Жигули 1.0л", "price": 990},
+                    {"name": "Разливное пиво Шымкентское 1.0л", "price": 990},
+                    {"name": "Разливное пиво Кит 1.0л", "price": 940},
+                    {"name": "Разливное пиво Немецкое 1.0л", "price": 1290}
+                ]
+            },
+            "soda": {
+                "title": "🥤 Напитки и Соки",
+                "items": [
+                    {"name": "Coca-Cola 0.5л", "price": 590},
+                    {"name": "Coca-Cola 1.0л", "price": 890},
+                    {"name": "Fanta Orange 0.5л", "price": 590},
+                    {"name": "Fanta Orange 1.0л", "price": 890},
+                    {"name": "Sprite 0.5л", "price": 590},
+                    {"name": "Sprite 1.0л", "price": 890},
+                    {"name": "Pepsi-Cola 0.5л", "price": 590},
+                    {"name": "Pepsi-Cola 1.0л", "price": 890},
+                    {"name": "Сок Piko Ананас 1.0л", "price": 1490},
+                    {"name": "Сок Piko Яблоко 1.0л", "price": 1490},
+                    {"name": "Сок Piko Вишня 1.0л", "price": 1490},
+                    {"name": "Сок Piko Апельсин 1.0л", "price": 1490}
+                ]
+            },
+            "energy": {
+                "title": "⚡ Энергетики",
+                "items": [
+                    {"name": "Энергетик Dizzy Original 0.33л", "price": 790},
+                    {"name": "Энергетик Red Bull 0.25л", "price": 1150},
+                    {"name": "Энергетик Gorilla Classic 0.45л", "price": 890}
+                ]
+            },
+            "water": {
+                "title": "💧 Питьевая вода",
+                "items": [
+                    {"name": "Вода Samal 0.5л", "price": 550},
+                    {"name": "Вода Samal 1.0л", "price": 750},
+                    {"name": "Вода Bonaqua 0.5л", "price": 550},
+                    {"name": "Вода Bonaqua 1.0л", "price": 750}
+                ]
+            },
+            "wh": {
+                "title": "🥃 Виски",
+                "items": [
+                    {"name": "Виски Ballantine's Finest 0.5л", "price": 8500},
+                    {"name": "Виски Jack Daniel's Tennessee 0.7л", "price": 17900},
+                    {"name": "Виски Monkey Shoulder 0.7л", "price": 29500},
+                    {"name": "Виски J&B Rare 0.5л", "price": 9000},
+                    {"name": "Виски Clan MacGregor 0.5л", "price": 7000},
+                    {"name": "Виски William Lawson's 1.0л", "price": 11000},
+                    {"name": "Виски Jameson Irish Whiskey 0.5л", "price": 11900},
+                    {"name": "Виски Johnnie Walker Red Label 0.5л", "price": 10900},
+                    {"name": "Виски Bell's Original 0.5л", "price": 7000}
+                ]
+            },
+            "vd": {
+                "title": "🍸 Водка",
+                "items": [
+                    {"name": "Водка Beluga Premium 0.7л", "price": 26000},
+                    {"name": "Водка Qazaq Eli Nomad 0.5л", "price": 7000},
+                    {"name": "Водка Хортиця Ice 0.7л", "price": 4350},
+                    {"name": "Водка Nemiroff Lex 0.5л", "price": 11990},
+                    {"name": "Водка Absolut Blue 0.5л", "price": 7900},
+                    {"name": "Водка Finlandia 0.5л", "price": 7900},
+                    {"name": "Водка Синяя гора 0.5л", "price": 3500},
+                    {"name": "Водка Хаома 0.5л", "price": 3500}
+                ]
+            },
+            "liqueur": {
+                "title": "🍹 Ликеры и Текила",
+                "items": [
+                    {"name": "Ликер Jagermeister 1.0л", "price": 16700},
+                    {"name": "Ликер Jagermeister 0.5л", "price": 11900},
+                    {"name": "Аперитив Aperol 1.0л", "price": 16750},
+                    {"name": "Игристое вино Martini Asti 0.75л", "price": 6000},
+                    {"name": "Текила Olmeca Gold 0.5л", "price": 9500},
+                    {"name": "Текила Olmeca Silver 0.5л", "price": 9500},
+                    {"name": "Джин 0.5л", "price": 13900},
+                    {"name": "Ликер Baileys Original 0.5л", "price": 11900}
+                ]
+            },
+            "cognac": {
+                "title": "🐴 Коньяк",
+                "items": [
+                    {"name": "Коньяк Бахус Vintage 0.5л", "price": 2500},
+                    {"name": "Коньяк Казахстан 5 звезд 0.5л", "price": 5900},
+                    {"name": "Коньяк Арарат 5 звезд 0.5л", "price": 6500}
+                ]
+            },
+            "bb": {
+                "title": "🍺 Бутылочное пиво",
+                "items": [
+                    {"name": "Пиво Шымкентское Светлое 0.45л", "price": 560},
+                    {"name": "Пиво Жигулевское Особое 0.5л", "price": 520},
+                    {"name": "Пиво Белый Медведь Светлое 0.45л", "price": 580},
+                    {"name": "Пиво Балтика №3 Классическое 0.45л", "price": 620},
+                    {"name": "Пиво Балтика №7 Экспортное 0.45л", "price": 670},
+                    {"name": "Пиво Балтика №9 Крепкое 0.45л", "price": 690},
+                    {"name": "Пиво Bud Светлое 0.45л", "price": 810},
+                    {"name": "Пиво Старопрамен Светлое 0.45л", "price": 830},
+                    {"name": "Пиво Туборг Грин Светлое 0.45л", "price": 740},
+                    {"name": "Пиво Хайнекен Светлое 0.45л", "price": 1010},
+                    {"name": "Пиво Стелла Артуа Светлое 0.45л", "price": 1050},
+                    {"name": "Пиво Хугарден Белое 0.45л", "price": 1230},
+                    {"name": "Пиво Корона Экстра Светлое 0.355л", "price": 1190},
+                    {"name": "Пиво Жатецкий Гусь Светлое 0.45л", "price": 610},
+                    {"name": "Пиво Эфес Казахстан Светлое 0.45л", "price": 580},
+                    {"name": "Пиво Крушовице Светлое 0.45л", "price": 810},
+                    {"name": "Пиво Миллер Дженуин Драфт 0.45л", "price": 1020},
+                    {"name": "Пивной напиток Эсса 0.45л", "price": 830},
+                    {"name": "Пивной напиток Гараж Лимон 0.45л", "price": 730},
+                    {"name": "Пивной напиток Гараж Брусника 0.45л", "price": 730}
+                ]
+            },
+            "sn": {
+                "title": "🍿 Закуски",
+                "items": [
+                    {"name": "Сыр Чечел копченый (косичка)", "price": 950},
+                    {"name": "Сыр Чечел молочный (косичка)", "price": 950},
+                    {"name": "Семечки Джинн (Большая пачка)", "price": 650},
+                    {"name": "Арахис соленый к пиву", "price": 550},
+                    {"name": "Чипсы Lay's в ассортименте", "price": 1250},
+                    {"name": "Курт домашний (порция)", "price": 700}
+                ]
+            }
         };
 
-        // Запрашиваем каталог у твоего сервера бота при старте
-        // Заглушка каталога (будет заменена реальными данными при связи)
-        async function loadCatalog() {
-            try {
-                // Если бот передает данные при открытии, парсим их
-                // В базовой связке используем структуру, идентичную shop_catalog.json
-                const response = await fetch('shop_catalog.json');
-                catalogData = await response.json();
-            } catch (e) {
-                // Если файл не прочитался напрямую по относительной ссылке, генерируем структуру
-                catalogData = {
-                    "beer": {
-                        "title": "Разливное пиво (за 1 литр)",
-                        "items": [
-                            {"name": "Разливное пиво Прага 1.0л", "price": 1100, "status": true},
-                            {"name": "Разливное пиво Эрзманн 1.0л", "price": 1290, "status": true},
-                            {"name": "Разливное пиво Чешское 1.0л", "price": 1290, "status": true},
-                            {"name": "Разливное пиво Жигули 1.0л", "price": 990, "status": true},
-                            {"name": "Разливное пиво Шымкентское 1.0л", "price": 990, "status": true},
-                            {"name": "Разливное пиво Кит 1.0л", "price": 940, "status": true},
-                            {"name": "Разливное пиво Немецкое 1.0л", "price": 1290, "status": true}
-                        ]
-                    }
-                };
-            }
-            renderCategories();
-        }
+        let currentCategory = "beer";
+        let cart = [];
 
-        // Отрисовка вкладок-категорий
+        // Отрисовка верхних кнопок-категорий
         function renderCategories() {
             const menu = document.getElementById("categories-menu");
             menu.innerHTML = "";
             
-            let isFirst = true;
             for (let catId in catalogData) {
                 const btn = document.createElement("button");
-                btn.className = `category-btn ${isFirst ? 'active' : ''}`;
-                const emoji = categoryEmojis[catId] || "📦";
-                btn.innerText = `${emoji} ${catalogData[catId].title.replace(/[^а-яА-ЯёЁ\s]/g, "").trim()}`;
+                btn.className = `category-btn ${catId === currentCategory ? 'active' : ''}`;
+                btn.innerText = catalogData[catId].title;
                 btn.onclick = () => switchCategory(catId, btn);
                 menu.appendChild(btn);
-                
-                if (isFirst) {
-                    currentCategory = catId;
-                    isFirst = false;
-                }
             }
-            renderProducts();
         }
 
-        // Переключение вкладок
+        // Переключение категорий
         function switchCategory(catId, element) {
             document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
             element.classList.add("active");
@@ -254,22 +338,17 @@
             renderProducts();
         }
 
-        // Отрисовка карточек товаров
+        // Отрисовка товаров
         function renderProducts() {
             const container = document.getElementById("products-container");
             container.innerHTML = "";
             
-            if (!catalogData[currentCategory]) return;
+            const category = catalogData[currentCategory];
+            const emoji = category.title.split(" ")[0] || "🍺"; // Берём эмодзи из названия категории
             
-            catalogData[currentCategory].items.forEach((item, index) => {
-                if (item.status === false) return; // Пропускаем скрытые админом товары
-                
+            category.items.forEach((item) => {
                 const card = document.createElement("div");
                 card.className = "product-card";
-                
-                // Выбираем эмодзи в зависимости от категории для заглушки фото
-                const emoji = categoryEmojis[currentCategory] || "🍺";
-                
                 card.innerHTML = `
                     <div class="product-img">${emoji}</div>
                     <div class="product-name">${item.name}</div>
@@ -284,7 +363,9 @@
         function addToCart(name, price) {
             cart.push({name, price});
             updateTotal();
-            tg.HapticFeedback.impactOccurred("light"); // Виброотклик при нажатии
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred("light");
+            }
         }
 
         function updateTotal() {
@@ -292,20 +373,19 @@
             document.getElementById("total-price").innerText = `Итого: ${total} ₸`;
         }
 
-        // Отправка заказа обратно в чат боту при нажатии «Оформить»
+        // Отправка данных боту
         function sendOrder() {
             if (cart.length === 0) {
                 alert("Ваша корзина пуста!");
                 return;
             }
-            
-            // Формируем данные и отправляем их боту текстом, закрывая WebApp
             tg.sendData(JSON.stringify(cart));
             tg.close();
         }
 
-        // Запуск при загрузке страницы
-        loadCatalog();
+        // Запуск
+        renderCategories();
+        renderProducts();
     </script>
 </body>
 </html>
