@@ -73,14 +73,12 @@
         }
         .product-img {
             width: 100%;
-            height: 90px;
-            object-fit: cover;
+            height: 110px;
             border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             background-color: #262626;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
         }
         .product-name {
             font-size: 13px;
@@ -104,14 +102,42 @@
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 8px;
+            padding: 9px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            font-size: 12px;
+            font-size: 13px;
         }
-        .add-btn:active {
-            background-color: #2980b9;
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #262626;
+            border-radius: 8px;
+            padding: 2px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .q-btn {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .q-count {
+            font-size: 15px;
+            font-weight: bold;
+            color: #ffffff;
+            min-width: 24px;
+            text-align: center;
         }
         .footer-panel {
             position: fixed;
@@ -140,6 +166,104 @@
             font-weight: bold;
             cursor: pointer;
         }
+
+        /* 🛒 СТИЛИ ОКНА КОРЗИНЫ НА САЙТЕ */
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #131313;
+            z-index: 200;
+            padding: 20px;
+            overflow-y: auto;
+            flex-direction: column;
+        }
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2d2d2d;
+            padding-bottom: 10px;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .cart-items-list {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #232323;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #b3b3b3;
+        }
+        .form-input {
+            width: 100%;
+            background-color: #1a1a1a;
+            border: 1px solid #3d3d3d;
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .radio-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 5px;
+        }
+        .radio-label {
+            flex: 1;
+            background-color: #1a1a1a;
+            border: 1px solid #3d3d3d;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .radio-input {
+            display: none;
+        }
+        .radio-input:checked + .radio-label {
+            border-color: #e67e22;
+            background-color: rgba(230, 126, 34, 0.1);
+            color: #e67e22;
+        }
+        .submit-order-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -150,14 +274,42 @@
 
     <div class="footer-panel">
         <div class="total-price" id="total-price">Итого: 0 ₸</div>
-        <button class="checkout-btn" onclick="sendOrder()">Оформить заказ</button>
+        <button class="checkout-btn" onclick="openCartModal()">Оформить заказ</button>
+    </div>
+
+    <div class="cart-modal" id="cart-modal">
+        <div class="modal-header">
+            <span>Проверка заказа</span>
+            <button class="close-modal" onclick="closeCartModal()">✕</button>
+        </div>
+
+        <div class="cart-items-list" id="cart-items-list"></div>
+
+        <div class="form-group">
+            <label for="user-phone">📞 Ваш номер телефона:</label>
+            <input type="tel" id="user-phone" class="form-input" placeholder="+7 (707) 123-45-67">
+        </div>
+
+        <div class="form-group">
+            <label>💰 Способ оплаты:</label>
+            <div class="radio-group">
+                <input type="radio" id="pay-kaspi" name="payment" value="Каспи перевод" checked class="radio-input">
+                <label for="pay-kaspi" class="radio-label">Kaspi перевод</label>
+
+                <input type="radio" id="pay-cash" name="payment" value="Наличными" class="radio-input">
+                <label for="pay-cash" class="radio-label">Наличными</label>
+            </div>
+        </div>
+
+        <div style="font-size: 18px; font-weight: bold; margin: 20px 0; text-align: right;" id="modal-total">Итого: 0 ₸</div>
+
+        <button class="submit-order-btn" onclick="sendFinalOrder()">Подтвердить заказ</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Полная база данных, зашитая прямо в сайт, чтобы ничего не терялось!
         const catalogData = {
             "beer": {
                 "title": "🍻 Разливное пиво",
@@ -279,8 +431,21 @@
             }
         };
 
+        const categoryImages = {
+            "beer": "https://images.unsplash.com/photo-1532634922-8fe0b757fb13?w=400&q=80",
+            "soda": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80",
+            "energy": "https://images.unsplash.com/photo-1622543953495-a178e2254b0d?w=400&q=80",
+            "water": "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&q=80",
+            "wh": "https://images.unsplash.com/photo-1527281473223-0cd44f932735?w=400&q=80",
+            "vd": "https://images.unsplash.com/photo-1550985543-f47f38aeee65?w=400&q=80",
+            "liqueur": "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400&q=80",
+            "cognac": "https://images.unsplash.com/photo-1516535794938-6063878f08cc?w=400&q=80",
+            "bb": "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400&q=80",
+            "sn": "https://images.unsplash.com/photo-1599490659213-e2b9527bb087?w=400&q=80"
+        };
+
         let currentCategory = "beer";
-        let cart = [];
+        let cartState = {}; 
 
         function renderCategories() {
             const menu = document.getElementById("categories-menu");
@@ -302,34 +467,146 @@
         function renderProducts() {
             const container = document.getElementById("products-container");
             container.innerHTML = "";
-            const emojis = {"beer":"🍻","soda":"🥤","energy":"⚡","water":"💧","wh":"🥃","vd":"🍸","liqueur":"🍹","cognac":"🐴","bb":"🍺","sn":"🍿"};
+            const imageUrl = categoryImages[currentCategory] || "";
             
             catalogData[currentCategory].items.forEach(item => {
                 const card = document.createElement("div");
                 card.className = "product-card";
+                const currentCount = cartState[item.name] || 0;
+                
+                let actionButtonHTML = currentCount > 0 ? `
+                    <div class="quantity-control">
+                        <button class="q-btn" onclick="changeQuantity('${item.name}', ${item.price}, -1)">−</button>
+                        <span class="q-count">${currentCount}</span>
+                        <button class="q-btn" onclick="changeQuantity('${item.name}', ${item.price}, 1)">+</button>
+                    </div>
+                ` : `
+                    <button class="add-btn" onclick="changeQuantity('${item.name}', ${item.price}, 1)">В корзину</button>
+                `;
+
                 card.innerHTML = `
-                    <div class="product-img">${emojis[currentCategory] || "🎁"}</div>
+                    <div class="product-img" style="background-image: url('${imageUrl}')"></div>
                     <div class="product-name">${item.name}</div>
                     <div class="product-price">${item.price} ₸</div>
-                    <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">В корзину</button>
+                    <div id="action-block-${encodeURIComponent(item.name)}">${actionButtonHTML}</div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function addToCart(name, price) {
-            cart.push({name, price});
-            let total = cart.reduce((sum, i) => sum + i.price, 0);
-            document.getElementById("total-price").innerText = `Итого: ${total} ₸`;
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
+        function changeQuantity(name, price, delta) {
+            const currentCount = cartState[name] || 0;
+            const newCount = currentCount + delta;
+            
+            if (newCount <= 0) {
+                delete cartState[name];
+            } else {
+                cartState[name] = newCount;
+            }
+            
+            const block = document.getElementById(`action-block-${encodeURIComponent(name)}`);
+            if (block) {
+                block.innerHTML = newCount > 0 ? `
+                    <div class="quantity-control">
+                        <button class="q-btn" onclick="changeQuantity('${name}', ${price}, -1)">−</button>
+                        <span class="q-count">${newCount}</span>
+                        <button class="q-btn" onclick="changeQuantity('${name}', ${price}, 1)">+</button>
+                    </div>
+                ` : `
+                    <button class="add-btn" onclick="changeQuantity('${name}', ${price}, 1)">В корзину</button>
+                `;
+            }
+            updateTotal();
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred("light");
         }
 
-        function sendOrder() {
-            if (cart.length === 0) {
-                alert("Корзина пуста!");
+        function calculateTotal() {
+            let total = 0;
+            for (let catId in catalogData) {
+                catalogData[catId].items.forEach(item => {
+                    if (cartState[item.name]) {
+                        total += item.price * cartState[item.name];
+                    }
+                });
+            }
+            return total;
+        }
+
+        function updateTotal() {
+            let total = calculateTotal();
+            document.getElementById("total-price").innerText = `Итого: ${total} ₸`;
+        }
+
+        /* 🛒 ФУНКЦИИ КОРЗИНЫ НА САЙТЕ */
+        function openCartModal() {
+            const total = calculateTotal();
+            if (total === 0) {
+                alert("Ваша корзина пуста!");
                 return;
             }
-            tg.sendData(JSON.stringify(cart));
+
+            const listContainer = document.getElementById("cart-items-list");
+            listContainer.innerHTML = "";
+            
+            // Выводим список товаров в модальное окно
+            for (let name in cartState) {
+                let itemPrice = 0;
+                for (let catId in catalogData) {
+                    let found = catalogData[catId].items.find(i => i.name === name);
+                    if (found) itemPrice = found.price;
+                }
+                
+                const count = cartState[name];
+                const row = document.createElement("div");
+                row.className = "cart-item-row";
+                row.innerHTML = `
+                    <span>${name} <b>x${count}</b></span>
+                    <span>${itemPrice * count} ₸</span>
+                `;
+                listContainer.appendChild(row);
+            }
+
+            document.getElementById("modal-total").innerText = `Итого: ${total} ₸`;
+            document.getElementById("cart-modal").style.display = "flex";
+        }
+
+        function closeCartModal() {
+            document.getElementById("cart-modal").style.display = "none";
+        }
+
+        // Финальная отправка заказа со всеми данными
+        function sendFinalOrder() {
+            const phoneInput = document.getElementById("user-phone").value.strip ? document.getElementById("user-phone").value.strip() : document.getElementById("user-phone").value;
+            const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+            if (!phoneInput || phoneInput.length < 7) {
+                alert("Пожалуйста, введите корректный номер телефона!");
+                return;
+            }
+
+            // Формируем плоский список товаров для передачи в бот
+            let flatCart = [];
+            for (let catId in catalogData) {
+                catalogData[catId].items.forEach(item => {
+                    const count = cartState[item.name] || 0;
+                    for (let i = 0; i < count; i++) {
+                        flatCart.push({
+                            name: item.name,
+                            price: item.price
+                        });
+                    }
+                });
+            }
+
+            // Упаковываем заказ вместе с номером телефона и методом оплаты
+            const orderPayload = {
+                items: flatCart,
+                phone: phoneInput,
+                payment: paymentMethod
+            };
+
+            // Передаем всё одним махом серверу и закрываем приложение
+            tg.sendData(JSON.stringify(orderPayload));
             tg.close();
         }
 
