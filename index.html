@@ -177,11 +177,9 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        if (tg) {
-            tg.expand();
-        }
+        tg.expand();
 
-        // 📦 ТВОЯ ПОЛНАЯ БАЗА ТОВАРОВ
+        // 📦 ТВОЯ ПОЛНАЯ БАЗА ТОВАРОВ ПРЯМО В КОДЕ САЙТА
         const catalogData = {
             "beer": {
                 "title": "🍻 Разливное пиво",
@@ -327,11 +325,7 @@
                 const btn = document.createElement("button");
                 btn.className = `category-btn ${catId === currentCategory ? 'active' : ''}`;
                 btn.innerText = catalogData[catId].title;
-                btn.onclick = (function(id, element) {
-                    return function() {
-                        switchCategory(id, this);
-                    };
-                })(catId, btn);
+                btn.onclick = () => switchCategory(catId, btn);
                 menu.appendChild(btn);
             }
         }
@@ -350,9 +344,7 @@
             container.innerHTML = "";
             
             const category = catalogData[currentCategory];
-            if (!category) return;
-            
-            const emoji = category.title.split(" ")[0] || "🍺";
+            const emoji = category.title.split(" ")[0] || "🍺"; // Берём эмодзи из названия категории
             
             category.items.forEach((item) => {
                 const card = document.createElement("div");
@@ -371,7 +363,7 @@
         function addToCart(name, price) {
             cart.push({name, price});
             updateTotal();
-            if (tg && tg.HapticFeedback) {
+            if (tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred("light");
             }
         }
@@ -387,17 +379,13 @@
                 alert("Ваша корзина пуста!");
                 return;
             }
-            if (tg) {
-                tg.sendData(JSON.stringify(cart));
-                tg.close();
-            }
+            tg.sendData(JSON.stringify(cart));
+            tg.close();
         }
 
-        // Запуск интерфейса
-        window.onload = function() {
-            renderCategories();
-            renderProducts();
-        };
+        // Запуск
+        renderCategories();
+        renderProducts();
     </script>
 </body>
 </html>
